@@ -3,6 +3,7 @@ var parentRequire = require('parent-require'),
     extend = require('extend'),
     fs = require('fs'),
     path = require('path'),
+    watch = require('gulp-watch'),
     inject = require('gulp-inject'),
     replace = require('gulp-replace'),
     livereload = require('gulp-livereload'),
@@ -28,7 +29,7 @@ module.exports = function(opts) {
         livereload.listen({
             port: options.livereload
         });
-        gulp.watch(options.files, createSpecrunner);
+        watch(options.files, createSpecrunner);
     };
 };
 
