@@ -7,6 +7,7 @@ var parentRequire = require('parent-require'),
     inject = require('gulp-inject'),
     replace = require('gulp-replace'),
     livereload = require('gulp-livereload'),
+    webserver = require('gulp-webserver'),
     open = require('open'),
     opened,
     template = {
@@ -38,7 +39,16 @@ function createSpecrunner () {
 
     target.on('end', function () {
         if (!opened) {
-            open('file:///' + path.join(path.resolve('.'), 'SpecRunner.html'));
+            if (!options.host) {
+                open('file:///' + path.join(path.resolve('.'), 'SpecRunner.html'));
+            } else {
+                gulp.src('.')
+                    .pipe(webserver({
+                      open: 'SpecRunner.html',
+                      host: options.host,
+                      port: options.port
+                    }));
+            }
             opened = true;
         }
     });

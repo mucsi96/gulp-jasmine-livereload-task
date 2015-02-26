@@ -3,6 +3,7 @@
 A [gulp](http://gulpjs.com/) plugin that runs [Jasmine](http://jasmine.github.io/) tests in browser with [livereload](http://livereload.com/).
 
 ![alt tag](http://people.inf.elte.hu/mucsi96/img/jasmine.png)
+![alt tag](http://people.inf.elte.hu/mucsi96/img/jasmine-mobile.png)
 
 ## Installation
 
@@ -32,6 +33,8 @@ These options can be set through `jasmine(options)`.
 files        Source files and specs
 jasmine      Jasmine version. Default: 2.2. Supported versions: 1.3, 2.0, 2.1, 2.2
 livereload   Livereload server port. Default: 35729
+host         Host name. If need to be served
+port         Port number. If need to be served
 ```
 
 ## License
