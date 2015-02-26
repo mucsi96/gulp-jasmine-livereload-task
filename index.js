@@ -16,14 +16,22 @@ var parentRequire = require('parent-require'),
         '2.1': 'node_modules/gulp-jasmine-livereload-task/vendor/jasmine-2.1.3/SpecRunner.html',
         '2.2': 'node_modules/gulp-jasmine-livereload-task/vendor/jasmine-2.2.0/SpecRunner.html'
     },
+    jshint = {
+        '2.6': 'node_modules/gulp-jasmine-livereload-task/vendor/jshint-2.6.0/jshint.js'
+    },
     defaults = {
         jasmine: '2.2',
-        livereload: '35729'
+        livereload: '35729',
+        jshint: {
+            version: '2.6',
+            filesRegex: undefined,
+            options: {}
+        }
     },
     options;
 
 module.exports = function(opts) {
-    options = extend({}, defaults, opts);
+    options = extend(true, {}, defaults, opts);
 
     return function() {
         createSpecrunner();
@@ -35,7 +43,8 @@ module.exports = function(opts) {
 };
 
 function createSpecrunner () {
-    var target = gulp.dest('.');
+    var target = gulp.dest('.'),
+        specrunner;
 
     target.on('end', function () {
         if (!opened) {
@@ -57,11 +66,18 @@ function createSpecrunner () {
         throw new Error('Jasmine version ' + options.jasmine + ' is currently not supported!');
     }
 
-    gulp.src(template[options.jasmine])
+    specrunner = gulp.src(template[options.jasmine])
         .pipe(inject(gulp.src(options.files, {read: false}), {
             addRootSlash: false
         }))
-        .pipe(replace(/<!-- livereload:js -->/g, '<script src="http://localhost:' + options.livereload + '/livereload.js"></script>'))
+        .pipe(replace(/<!-- livereload:js -->/g, '<script src="http://localhost:' + options.livereload + '/livereload.js"></script>'));
+
+    if (options.jshint.filesRegex) {
+        specrunner = specrunner
+            .pipe(replace(/<!-- jshint:js -->/g, '<script src="' + jshint[options.jshint.version] + '"></script><script src="node_modules/gulp-jasmine-livereload-task/jshint-spec.js"></script>'));
+    }
+
+    specrunner
         .pipe(target)
         .pipe(livereload());
 }
