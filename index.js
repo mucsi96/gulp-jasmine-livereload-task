@@ -3,6 +3,7 @@ var parentRequire = require('parent-require'),
     extend = require('extend'),
     fs = require('fs'),
     path = require('path'),
+    glob = require('glob'),
     watch = require('gulp-watch'),
     inject = require('gulp-inject'),
     replace = require('gulp-replace'),
@@ -20,15 +21,36 @@ var parentRequire = require('parent-require'),
         '2.6': 'node_modules/gulp-jasmine-livereload-task/vendor/jshint-2.6.0/jshint.js'
     },
     defaults = {
+        files: undefined,
         jasmine: '2.2',
         livereload: '35729',
         jshint: {
             version: '2.6',
-            filesRegex: undefined,
+            files: [],
             options: {}
         }
     },
     options;
+
+function expand(globs) {
+    var result = [];
+
+    globs.forEach(function (g) {
+        result = result.concat(glob.sync(g));
+    });
+
+    return result;
+}
+
+function replaceAll(array, regex, newSubstring) {
+    var result = [];
+
+    array.forEach(function(item) {
+        result.push(item.replace(regex, newSubstring));
+    });
+
+    return result;
+}
 
 module.exports = function(opts) {
     options = extend(true, {}, defaults, opts);
@@ -66,13 +88,17 @@ function createSpecrunner () {
         throw new Error('Jasmine version ' + options.jasmine + ' is currently not supported!');
     }
 
+    options.jshint.expandedFiles = expand(options.jshint.files);
+    options.jshint.expandedFiles = replaceAll(options.jshint.expandedFiles, /^\.\//, '');
+
     specrunner = gulp.src(template[options.jasmine])
         .pipe(inject(gulp.src(options.files, {read: false}), {
             addRootSlash: false
         }))
-        .pipe(replace(/<!-- livereload:js -->/g, '<script src="http://localhost:' + options.livereload + '/livereload.js"></script>'));
+        .pipe(replace(/<!-- livereload:js -->/g, '<script src="http://localhost:' + options.livereload + '/livereload.js"></script>'))
+        .pipe(replace(/<!-- options:js -->/g, '<script>var gulpJasmineLivereloadTaskOptions = JSON.parse(\'' + JSON.stringify(options) + '\');</script>'));
 
-    if (options.jshint.filesRegex) {
+    if (options.jshint.expandedFiles.length > 0) {
         specrunner = specrunner
             .pipe(replace(/<!-- jshint:js -->/g, '<script src="' + jshint[options.jshint.version] + '"></script><script src="node_modules/gulp-jasmine-livereload-task/jshint-spec.js"></script>'));
     }
