@@ -1,39 +1,49 @@
-describe('JSHint', function() {
-
-    function get(path) {
-        path = path + "?" + new Date().getTime();
-
-        var xhr;
-        try {
-            xhr = new XMLHttpRequest();
-            xhr.open("GET", path, false);
-            xhr.send(null);
-        } catch (e) {
-            throw new Error("couldn't fetch " + path + ": " + e);
-        }
-        if (xhr.status < 200 || xhr.status > 299) {
-            throw new Error("Could not load '" + path + "'.");
-        }
-
-        return xhr.responseText;
-    }
+describe('JSHint', function () {
 
     function testFile(script) {
-        it(script, function() {
-            var self = this;
-            var source = get(script);
-            var result = JSHINT(source, gulpJasmineLivereloadTaskOptions.jshint.options);
+        it(script.getAttribute('src'), function() {
+            if (gulpJasmineLivereloadTaskOptions.jasmine > '1.3') {
+                jasmine.addMatchers({
+                    toBeEmptyMessage: function () {
+                        return {
+                            compare: function (message) {
+                                return {
+                                    pass: !message,
+                                    message: message
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                this.addMatchers({
+                    toBeEmptyMessage: function () {
+                        var self = this;
+                        this.message = function() {
+                            return [self.actual];
+                        };
+                        return !this.actual;
+                    }
+                });
+            }
+            JSHINT(script.innerHTML, gulpJasmineLivereloadTaskOptions.jshint.options);
+
             JSHINT.errors.forEach(function(error) {
-                expect('line ' + error.line + ' - ' + error.reason).toEqual('');
+                expect('line ' + error.line + ' - ' + error.reason).toBeEmptyMessage();
             });
 
             if (JSHINT.errors.length <= 0) {
-                expect(true).toEqual(true);
+                expect('').toBeEmptyMessage();
             }
         });
     }
 
-    gulpJasmineLivereloadTaskOptions.jshint.expandedFiles.forEach(function (file) {
-        testFile(file);
-    });
+    scripts = document.getElementsByTagName('script');
+
+    for (var i = 0; i < scripts.length; i++) {
+        script = scripts[i];
+        if (script.getAttribute('type') === 'jshint') {
+            testFile(script);
+        }
+    }
 });

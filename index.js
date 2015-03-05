@@ -3,7 +3,6 @@ var parentRequire = require('parent-require'),
     extend = require('extend'),
     fs = require('fs'),
     path = require('path'),
-    glob = require('glob'),
     watch = require('gulp-watch'),
     inject = require('gulp-inject'),
     replace = require('gulp-replace'),
@@ -31,26 +30,6 @@ var parentRequire = require('parent-require'),
         }
     },
     options;
-
-function expand(globs) {
-    var result = [];
-
-    globs.forEach(function (g) {
-        result = result.concat(glob.sync(g));
-    });
-
-    return result;
-}
-
-function replaceAll(array, regex, newSubstring) {
-    var result = [];
-
-    array.forEach(function(item) {
-        result.push(item.replace(regex, newSubstring));
-    });
-
-    return result;
-}
 
 module.exports = function(opts) {
     options = extend(true, {}, defaults, opts);
@@ -88,19 +67,24 @@ function createSpecrunner () {
         throw new Error('Jasmine version ' + options.jasmine + ' is currently not supported!');
     }
 
-    options.jshint.expandedFiles = expand(options.jshint.files);
-    options.jshint.expandedFiles = replaceAll(options.jshint.expandedFiles, /^\.\//, '');
-
     specrunner = gulp.src(template[options.jasmine])
         .pipe(inject(gulp.src(options.files, {read: false}), {
             addRootSlash: false
         }))
-        .pipe(replace(/<!-- livereload:js -->/g, '<script src="http://localhost:' + options.livereload + '/livereload.js"></script>'))
-        .pipe(replace(/<!-- options:js -->/g, '<script>var gulpJasmineLivereloadTaskOptions = JSON.parse(\'' + JSON.stringify(options) + '\');</script>'));
+        .pipe(replace(/<!-- options:js -->/g, '<script>var gulpJasmineLivereloadTaskOptions = JSON.parse(\'' + JSON.stringify(options) + '\');</script>'))
+        .pipe(replace(/<!-- livereload:js -->/g, '<script src="http://localhost:' + options.livereload + '/livereload.js"></script>'));
 
-    if (options.jshint.expandedFiles.length > 0) {
+    if (options.jshint.files.length > 0) {
         specrunner = specrunner
-            .pipe(replace(/<!-- jshint:js -->/g, '<script src="' + jshint[options.jshint.version] + '"></script><script src="node_modules/gulp-jasmine-livereload-task/jshint-spec.js"></script>'));
+            .pipe(inject(gulp.src(options.jshint.files), {
+            name: 'jshintfiles',
+            addRootSlash: false,
+            transform: function (filePath, file) {
+                var source = file.contents.toString('utf8');
+                return '<script type="jshint" src="' + filePath + '">' + source + '</script>\n';
+            }
+        }))
+            .pipe(replace(/<!-- jshint:js -->/g, '<script src="' + jshint[options.jshint.version] + '"></script>\n<script src="node_modules/gulp-jasmine-livereload-task/jshint-spec.js"></script>'));
     }
 
     specrunner
