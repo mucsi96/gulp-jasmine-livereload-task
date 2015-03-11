@@ -42,9 +42,9 @@ describe('JSHint', function () {
             }
 
             if (!errors) {
+                console.log('Running jshint on "' + file.path + '"');
                 JSHINT(decodeURI(file.source), gulpJasmineLivereloadTask.options.jshint.options);
                 errors = JSHINT.errors;
-                console.log('Running jshint on "' + file.path + '"');
             }
 
             errors.forEach(function(error) {
