@@ -71,17 +71,20 @@ function createSpecrunner () {
         .pipe(inject(gulp.src(options.files, {read: false}), {
             addRootSlash: false
         }))
-        .pipe(replace(/<!-- options:js -->/g, '<script>var gulpJasmineLivereloadTaskOptions = JSON.parse(\'' + JSON.stringify(options) + '\');</script>'))
+        .pipe(replace(/<!-- options:js -->/g, '<script>var gulpJasmineLivereloadTask = {}; gulpJasmineLivereloadTask.options = JSON.parse(\'' + JSON.stringify(options) + '\');</script>'))
         .pipe(replace(/<!-- livereload:js -->/g, '<script src="http://localhost:' + options.livereload + '/livereload.js"></script>'));
 
     if (options.jshint.files.length > 0) {
         specrunner = specrunner
+            .pipe(replace(/<!-- sources:js -->/g, '<script>gulpJasmineLivereloadTask.sources = [];/*sources:js*//*endinject*/</script>'))
             .pipe(inject(gulp.src(options.jshint.files), {
-            name: 'jshintfiles',
+            name: 'sources',
             addRootSlash: false,
+            starttag: '/*sources:js*/',
+            endtag: '/*endinject*/',
             transform: function (filePath, file) {
-                var source = file.contents.toString('utf8');
-                return '<script type="jshint" src="' + filePath + '">' + source + '</script>\n';
+                var source = encodeURI(file.contents.toString('utf8'));
+                return 'gulpJasmineLivereloadTask.sources.push({path: "' + filePath + '", timeStamp: "' + file.stat.mtime.getTime() + '", source: "' + source + '"});\n';
             }
         }))
             .pipe(replace(/<!-- jshint:js -->/g, '<script src="' + jshint[options.jshint.version] + '"></script>\n<script src="node_modules/gulp-jasmine-livereload-task/jshint-spec.js"></script>'));

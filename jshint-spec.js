@@ -1,8 +1,13 @@
 describe('JSHint', function () {
+    var cacheName = 'gulpJasmineLivereloadTaskCache';
 
-    function testFile(script) {
-        it(script.getAttribute('src'), function() {
-            if (gulpJasmineLivereloadTaskOptions.jasmine > '1.3') {
+    function testFile(file) {
+        it(file.path, function() {
+            var cache,
+                fileData,
+                errors;
+
+            if (gulpJasmineLivereloadTask.options.jasmine > '1.3') {
                 jasmine.addMatchers({
                     toBeEmptyMessage: function () {
                         return {
@@ -26,24 +31,47 @@ describe('JSHint', function () {
                     }
                 });
             }
-            JSHINT(script.innerHTML, gulpJasmineLivereloadTaskOptions.jshint.options);
 
-            JSHINT.errors.forEach(function(error) {
+            if(typeof(Storage) !== "undefined") {
+                cache = JSON.parse(localStorage.getItem(cacheName));
+                fileData = cache && cache[file.path];
+
+                if (fileData && fileData.timeStamp === file.timeStamp) {
+                    errors = fileData.errors;
+                }
+            }
+
+            if (!errors) {
+                JSHINT(decodeURI(file.source), gulpJasmineLivereloadTask.options.jshint.options);
+                errors = JSHINT.errors;
+                console.log('Running jshint on "' + file.path + '"');
+            }
+
+            errors.forEach(function(error) {
                 expect('line ' + error.line + ' - ' + error.reason).toBeEmptyMessage();
             });
 
-            if (JSHINT.errors.length <= 0) {
+            if (errors.length <= 0) {
                 expect('').toBeEmptyMessage();
+            }
+
+            if(typeof(Storage) !== "undefined") {
+                if (!cache) {
+                    cache = {};
+                }
+
+                cache[file.path] = {
+                    timeStamp: file.timeStamp,
+                    errors: errors
+                };
+
+                localStorage.setItem(cacheName, JSON.stringify(cache));
             }
         });
     }
 
-    scripts = document.getElementsByTagName('script');
+    gulpJasmineLivereloadTask.sources.forEach(function (file) {
+        testFile(file);
+    });
 
-    for (var i = 0; i < scripts.length; i++) {
-        script = scripts[i];
-        if (script.getAttribute('type') === 'jshint') {
-            testFile(script);
-        }
-    }
 });
