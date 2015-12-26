@@ -3,21 +3,25 @@ var parentRequire = require('parent-require'),
     extend = require('extend'),
     fs = require('fs'),
     path = require('path'),
-    watch = require('gulp-watch'),
+    watch = require('gulp-debounced-watch'),
     inject = require('gulp-inject'),
     replace = require('gulp-replace'),
     livereload = require('gulp-livereload'),
     webserver = require('gulp-webserver'),
     open = require('open'),
     opened,
+    jasminePath = path.join(process.cwd(), 'node_modules', 'jasmine-core'),
+    jshintPath = path.join(process.cwd(), 'node_modules', 'jshint'),
     template = {
-        '1.3': 'node_modules/gulp-jasmine-livereload-task/vendor/jasmine-1.3.1/SpecRunner.html',
-        '2.0': 'node_modules/gulp-jasmine-livereload-task/vendor/jasmine-2.0.2/SpecRunner.html',
-        '2.1': 'node_modules/gulp-jasmine-livereload-task/vendor/jasmine-2.1.3/SpecRunner.html',
-        '2.2': 'node_modules/gulp-jasmine-livereload-task/vendor/jasmine-2.2.0/SpecRunner.html'
+        '1.3': path.join(__dirname, 'vendor/jasmine-1.3.1/SpecRunner.html'),
+        '2.0': path.join(__dirname, 'vendor/jasmine-2.0.2/SpecRunner.html'),
+        '2.1': path.join(__dirname, 'vendor/jasmine-2.1.3/SpecRunner.html'),
+        '2.2': path.join(__dirname, 'vendor/jasmine-2.2.0/SpecRunner.html'),
+        'peer': path.join(__dirname, 'vendor/jasmine/SpecRunner.html')
     },
     jshint = {
-        '2.6': 'node_modules/gulp-jasmine-livereload-task/vendor/jshint-2.6.0/jshint.js'
+        '2.6': path.join(__dirname, 'vendor/jshint-2.6.0/jshint.js'),
+        'peer': path.join(process.cwd(), 'node_modules', 'jshint/dist/jshint.js')
     },
     defaults = {
         files: undefined,
@@ -27,11 +31,34 @@ var parentRequire = require('parent-require'),
             version: '2.6',
             files: [],
             options: {}
+        },
+        watch: {
+            options: {}
         }
     },
     options;
 
 module.exports = function(opts) {
+
+    try {
+        require(jasminePath);
+        defaults.jasmine = 'peer';
+        console.log('Installed Jasmine found');
+
+    } catch(e) {
+        console.log('No installed Jasmine found. Using embedded one');
+    }
+
+    if (opts && opts.jshint && opts.jshint.files && opts.jshint.files.length) {
+        try {
+            require(jshintPath);
+            defaults.jshint.version = 'peer';
+            console.log('Installed Jshint found');
+        } catch(e) {
+            console.log('No installed jshint found. Using embedded one');
+        }
+    }
+
     options = extend(true, {}, defaults, opts);
 
     return function() {
@@ -39,7 +66,7 @@ module.exports = function(opts) {
         livereload.listen({
             port: options.livereload
         });
-        watch(options.files, createSpecrunner);
+        watch(options.files, options.watch.options, createSpecrunner);
     };
 };
 

@@ -26,10 +26,10 @@
   },
   "dependencies": {
     "extend": "^2.0.0",
+    "gulp-debounced-watch": "^1.0.4",
     "gulp-inject": "^1.1.1",
     "gulp-livereload": "^3.7.0",
     "gulp-replace": "^0.5.2",
-    "gulp-watch": "^4.1.1",
     "gulp-webserver": "^0.9.0",
     "open": "0.0.5",
     "parent-require": "^1.0.0"
