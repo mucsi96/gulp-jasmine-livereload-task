@@ -20,8 +20,8 @@ var parentRequire = require('parent-require'),
         'peer': path.join(__dirname, 'vendor/jasmine/SpecRunner.html')
     },
     jshint = {
-        '2.6': path.join(__dirname, 'vendor/jshint-2.6.0/jshint.js'),
-        'peer': path.join(process.cwd(), 'node_modules', 'jshint/dist/jshint.js')
+        '2.6': path.join('node_modules', 'gulp-jasmine-livereload-task', 'vendor/jshint-2.6.0/jshint.js'),
+        'peer': path.join('node_modules', 'jshint', 'dist/jshint.js')
     },
     defaults = {
         files: undefined,
