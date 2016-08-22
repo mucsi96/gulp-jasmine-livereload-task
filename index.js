@@ -10,18 +10,17 @@ var parentRequire = require('parent-require'),
     webserver = require('gulp-webserver'),
     open = require('open'),
     opened,
-    jasminePath = path.join(process.cwd(), 'node_modules', 'jasmine-core'),
-    jshintPath = path.join(process.cwd(), 'node_modules', 'jshint'),
+    vendorPath = path.join('node_modules', 'gulp-jasmine-livereload-task', 'vendor'),
     template = {
-        '1.3': path.join(__dirname, 'vendor/jasmine-1.3.1/SpecRunner.html'),
-        '2.0': path.join(__dirname, 'vendor/jasmine-2.0.2/SpecRunner.html'),
-        '2.1': path.join(__dirname, 'vendor/jasmine-2.1.3/SpecRunner.html'),
-        '2.2': path.join(__dirname, 'vendor/jasmine-2.2.0/SpecRunner.html'),
-        'peer': path.join(__dirname, 'vendor/jasmine/SpecRunner.html')
+        '1.3': path.join(vendorPath, 'jasmine-1.3.1', 'SpecRunner.html'),
+        '2.0': path.join(vendorPath, 'jasmine-2.0.2', 'SpecRunner.html'),
+        '2.1': path.join(vendorPath, 'jasmine-2.1.3', 'SpecRunner.html'),
+        '2.2': path.join(vendorPath, 'jasmine-2.2.0', 'SpecRunner.html'),
+        'peer': path.join('node_modules', 'jasmine', 'SpecRunner.html')
     },
     jshint = {
-        '2.6': path.join(__dirname, 'vendor/jshint-2.6.0/jshint.js'),
-        'peer': path.join(process.cwd(), 'node_modules', 'jshint/dist/jshint.js')
+        '2.6': path.join(vendorPath, 'jshint-2.6.0', 'jshint.js'),
+        'peer': path.join('node_modules', 'jshint', 'dist', 'jshint.js')
     },
     defaults = {
         files: undefined,
@@ -40,21 +39,18 @@ var parentRequire = require('parent-require'),
 
 module.exports = function(opts) {
 
-    try {
-        require(jasminePath);
+    if (fs.existsSync(template.peer)) {
         defaults.jasmine = 'peer';
         console.log('Installed Jasmine found');
-
-    } catch(e) {
+    } else {
         console.log('No installed Jasmine found. Using embedded one');
     }
 
     if (opts && opts.jshint && opts.jshint.files && opts.jshint.files.length) {
-        try {
-            require(jshintPath);
+        if (fs.existsSync(jshint.peer)) {
             defaults.jshint.version = 'peer';
             console.log('Installed Jshint found');
-        } catch(e) {
+        } else {
             console.log('No installed jshint found. Using embedded one');
         }
     }
