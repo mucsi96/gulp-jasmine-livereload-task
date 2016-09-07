@@ -37,8 +37,7 @@ var parentRequire = require('parent-require'),
     },
     options;
 
-module.exports = function(opts) {
-
+module.exports = function (opts) {
     if (fs.existsSync(template.peer)) {
         defaults.jasmine = 'peer';
         console.log('Installed Jasmine found');
@@ -57,7 +56,7 @@ module.exports = function(opts) {
 
     options = extend(true, {}, defaults, opts);
 
-    return function() {
+    return function () {
         createSpecrunner();
         livereload.listen({
             port: options.livereload
@@ -66,7 +65,7 @@ module.exports = function(opts) {
     };
 };
 
-function createSpecrunner () {
+function createSpecrunner() {
     var target = gulp.dest('.'),
         specrunner;
 
@@ -75,12 +74,14 @@ function createSpecrunner () {
             if (!options.host) {
                 open('file:///' + path.join(path.resolve('.'), 'SpecRunner.html'));
             } else {
-                gulp.src('.')
-                    .pipe(webserver({
-                      open: 'SpecRunner.html',
-                      host: options.host,
-                      port: options.port
-                    }));
+                gulp.src(options.staticAssetsPath || '.')
+                    .pipe(
+                        webserver({
+                            open: options.specRunnerPath || 'SpecRunner.html',
+                            host: options.host,
+                            port: options.port
+                        })
+                    );
             }
             opened = true;
         }
