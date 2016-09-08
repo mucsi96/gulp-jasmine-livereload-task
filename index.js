@@ -79,7 +79,7 @@ function createSpecrunner() {
                 gulp.src(options.staticAssetsPath)
                     .pipe(
                         webserver({
-                            open: options.specRunnerPath,
+                            open: options.specRunner,
                             host: options.host,
                             port: options.port
                         })
