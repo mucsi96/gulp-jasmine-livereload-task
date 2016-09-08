@@ -26,6 +26,8 @@ var parentRequire = require('parent-require'),
         files: undefined,
         jasmine: '2.2',
         livereload: '35729',
+        staticAssetsPath: '.',
+        specRunner: 'SpecRunner.html',
         jshint: {
             version: '2.6',
             files: [],
@@ -74,10 +76,10 @@ function createSpecrunner() {
             if (!options.host) {
                 open('file:///' + path.join(path.resolve('.'), 'SpecRunner.html'));
             } else {
-                gulp.src(options.staticAssetsPath || '.')
+                gulp.src(options.staticAssetsPath)
                     .pipe(
                         webserver({
-                            open: options.specRunnerPath || 'SpecRunner.html',
+                            open: options.specRunnerPath,
                             host: options.host,
                             port: options.port
                         })
@@ -102,15 +104,15 @@ function createSpecrunner() {
         specrunner = specrunner
             .pipe(replace(/<!-- sources:js -->/g, '<script>gulpJasmineLivereloadTask.sources = [];/*sources:js*//*endinject*/</script>'))
             .pipe(inject(gulp.src(options.jshint.files), {
-            name: 'sources',
-            addRootSlash: false,
-            starttag: '/*sources:js*/',
-            endtag: '/*endinject*/',
-            transform: function (filePath, file) {
-                var source = encodeURI(file.contents.toString('utf8'));
-                return 'gulpJasmineLivereloadTask.sources.push({path: "' + filePath + '", timeStamp: "' + file.stat.mtime.getTime() + '", source: "' + source + '"});\n';
-            }
-        }))
+                name: 'sources',
+                addRootSlash: false,
+                starttag: '/*sources:js*/',
+                endtag: '/*endinject*/',
+                transform: function (filePath, file) {
+                    var source = encodeURI(file.contents.toString('utf8'));
+                    return 'gulpJasmineLivereloadTask.sources.push({path: "' + filePath + '", timeStamp: "' + file.stat.mtime.getTime() + '", source: "' + source + '"});\n';
+                }
+            }))
             .pipe(replace(/<!-- jshint:js -->/g, '<script src="' + jshint[options.jshint.version] + '"></script>\n<script src="node_modules/gulp-jasmine-livereload-task/jshint-spec.js"></script>'));
     }
 
