@@ -89,15 +89,17 @@ gulp.task('default', jasmine({
 These options can be set through `jasmine(options)`.
 
 ```
-files            Source files and specs
-jasmine          Embedded jasmine version. Default: 2.2. Embedded versions: 1.3, 2.0, 2.1, 2.2
-livereload       Livereload server port. Default: 35729
-host             Host name. If need to be served
-port             Port number. If need to be served
-jshint.files     Files to be checked by jshint
-jshint.options   Options used by jshint
-jshint.version   Embedded Jshint version. Default: 2.6. Embedded versions: 2.6
-watch.options    Options used by gulp-debounced-watch package used for watching for file changes
+files               Source files and specs
+jasmine             Embedded jasmine version. Default: 2.2. Embedded versions: 1.3, 2.0, 2.1, 2.2
+livereload          Livereload server port. Default: 35729
+host                Host name. If need to be served
+port                Port number. If need to be served
+staticAssetsPath    The root path of the static files served by the webserver, by default it is the plugin folder
+specRunner          The path of the SpecRunner.html file, by default it is the plugin folder / SpecRunner.html
+jshint.files        Files to be checked by jshint
+jshint.options      Options used by jshint
+jshint.version      Embedded Jshint version. Default: 2.6. Embedded versions: 2.6
+watch.options       Options used by gulp-debounced-watch package used for watching for file changes
 ```
 
 ## License

@@ -26,6 +26,8 @@ var parentRequire = require('parent-require'),
         files: undefined,
         jasmine: '2.2',
         livereload: '35729',
+        staticAssetsPath: '.',
+        specRunner: 'SpecRunner.html',
         jshint: {
             version: '2.6',
             files: [],
@@ -37,8 +39,7 @@ var parentRequire = require('parent-require'),
     },
     options;
 
-module.exports = function(opts) {
-
+module.exports = function (opts) {
     if (fs.existsSync(template.peer)) {
         defaults.jasmine = 'peer';
         console.log('Installed Jasmine found');
@@ -57,7 +58,7 @@ module.exports = function(opts) {
 
     options = extend(true, {}, defaults, opts);
 
-    return function() {
+    return function () {
         createSpecrunner();
         livereload.listen({
             port: options.livereload
@@ -66,7 +67,7 @@ module.exports = function(opts) {
     };
 };
 
-function createSpecrunner () {
+function createSpecrunner() {
     var target = gulp.dest('.'),
         specrunner;
 
@@ -75,12 +76,14 @@ function createSpecrunner () {
             if (!options.host) {
                 open('file:///' + path.join(path.resolve('.'), 'SpecRunner.html'));
             } else {
-                gulp.src('.')
-                    .pipe(webserver({
-                      open: 'SpecRunner.html',
-                      host: options.host,
-                      port: options.port
-                    }));
+                gulp.src(options.staticAssetsPath)
+                    .pipe(
+                        webserver({
+                            open: options.specRunner,
+                            host: options.host,
+                            port: options.port
+                        })
+                    );
             }
             opened = true;
         }
@@ -101,15 +104,15 @@ function createSpecrunner () {
         specrunner = specrunner
             .pipe(replace(/<!-- sources:js -->/g, '<script>gulpJasmineLivereloadTask.sources = [];/*sources:js*//*endinject*/</script>'))
             .pipe(inject(gulp.src(options.jshint.files), {
-            name: 'sources',
-            addRootSlash: false,
-            starttag: '/*sources:js*/',
-            endtag: '/*endinject*/',
-            transform: function (filePath, file) {
-                var source = encodeURI(file.contents.toString('utf8'));
-                return 'gulpJasmineLivereloadTask.sources.push({path: "' + filePath + '", timeStamp: "' + file.stat.mtime.getTime() + '", source: "' + source + '"});\n';
-            }
-        }))
+                name: 'sources',
+                addRootSlash: false,
+                starttag: '/*sources:js*/',
+                endtag: '/*endinject*/',
+                transform: function (filePath, file) {
+                    var source = encodeURI(file.contents.toString('utf8'));
+                    return 'gulpJasmineLivereloadTask.sources.push({path: "' + filePath + '", timeStamp: "' + file.stat.mtime.getTime() + '", source: "' + source + '"});\n';
+                }
+            }))
             .pipe(replace(/<!-- jshint:js -->/g, '<script src="' + jshint[options.jshint.version] + '"></script>\n<script src="node_modules/gulp-jasmine-livereload-task/jshint-spec.js"></script>'));
     }
 
