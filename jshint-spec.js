@@ -1,45 +1,80 @@
 describe('JSHint', function () {
-    var cacheName = 'gulpJasmineLivereloadTaskCache';
-
-    function testFile(file) {
-        it(file.path, function() {
-            var cache,
-                fileData,
-                errors;
-
-            if (gulpJasmineLivereloadTask.options.jasmine > '1.3') {
-                jasmine.addMatchers({
-                    toBeEmptyMessage: function () {
-                        return {
-                            compare: function (message) {
-                                return {
-                                    pass: !message,
-                                    message: message
-                                }
+    var cacheName = 'gulpJasmineLivereloadTaskCache',
+        toBeEmptyMessageMatchers = {
+            currentVersion: {
+                toBeEmptyMessage: function () {
+                    return {
+                        compare: function (message) {
+                            return {
+                                pass: !message,
+                                message: message
                             }
                         }
                     }
-                });
-            } else {
-                this.addMatchers({
-                    toBeEmptyMessage: function () {
-                        var self = this;
-                        this.message = function() {
-                            return [self.actual];
-                        };
-                        return !this.actual;
-                    }
-                });
-            }
-
-            if(typeof(Storage) !== "undefined") {
-                cache = JSON.parse(localStorage.getItem(cacheName));
-                fileData = cache && cache[file.path];
-
-                if (fileData && fileData.timeStamp === file.timeStamp) {
-                    errors = fileData.errors;
+                }
+            },
+            '<1.3': {
+                toBeEmptyMessage: function () {
+                    var self = this;
+                    this.message = function () {
+                        return [self.actual];
+                    };
+                    return !this.actual;
                 }
             }
+        },
+        hasStorage = typeof (Storage) !== "undefined",
+        cache = hasStorage && JSON.parse(localStorage.getItem(cacheName));
+
+    function cacheJSHintOptions() {
+        cache.options = gulpJasmineLivereloadTask.options.jshint.options;
+
+        localStorage.setItem(cacheName, JSON.stringify(cache));
+    }
+
+    function initTestsCache() {
+        if (JSON.stringify(cache.options) !== JSON.stringify(gulpJasmineLivereloadTask.options.jshint.options)) {
+            cache = {};
+        }
+    }
+
+    function getCachedErrors(file) {
+        var fileData = cache && cache[file.path],
+            cachedErrors;
+
+        if (fileData && fileData.timeStamp === file.timeStamp) {
+            cachedErrors = fileData.errors;
+        }
+
+        return cachedErrors;
+    }
+
+    function cacheErrors(file, errors) {
+        if (hasStorage) {
+            cache[file.path] = {
+                timeStamp: file.timeStamp,
+                errors: errors
+            };
+
+            localStorage.setItem(cacheName, JSON.stringify(cache));
+        }
+    }
+
+    function addEmptyMessageMatcher(jasmineVersion, test) {
+        if (jasmineVersion < '1.3') {
+            jasmine.addMatchers(toBeEmptyMessageMatchers['<1.3']);
+        } else {
+            test.addMatchers(toBeEmptyMessageMatchers.currentVersion);
+        }
+    }
+
+    function testFile(file) {
+        it(file.path, function () {
+            var errors;
+
+            addEmptyMessageMatcher(gulpJasmineLivereloadTask.options.jasmine, this);
+
+            errors = getCachedErrors(file);
 
             if (!errors) {
                 console.log('Running jshint on "' + file.path + '"');
@@ -47,7 +82,7 @@ describe('JSHint', function () {
                 errors = JSHINT.errors;
             }
 
-            errors.forEach(function(error) {
+            errors.forEach(function (error) {
                 expect('line ' + error.line + ' - ' + error.reason).toBeEmptyMessage();
             });
 
@@ -55,23 +90,18 @@ describe('JSHint', function () {
                 expect('').toBeEmptyMessage();
             }
 
-            if(typeof(Storage) !== "undefined") {
-                if (!cache) {
-                    cache = {};
-                }
-
-                cache[file.path] = {
-                    timeStamp: file.timeStamp,
-                    errors: errors
-                };
-
-                localStorage.setItem(cacheName, JSON.stringify(cache));
-            }
+            cacheErrors(file, errors);
         });
     }
 
-    gulpJasmineLivereloadTask.sources.forEach(function (file) {
-        testFile(file);
-    });
+    function runTests() {
+        if (cache) {
+            initTestsCache();
+            cacheJSHintOptions();
+        }
 
+        gulpJasmineLivereloadTask.sources.forEach(testFile);
+    }
+
+    runTests();
 });
