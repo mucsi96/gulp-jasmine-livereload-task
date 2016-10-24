@@ -13,7 +13,7 @@ describe('JSHint', function () {
                     }
                 }
             },
-            '<1.3': {
+            '<=1.3': {
                 toBeEmptyMessage: function () {
                     var self = this;
                     this.message = function () {
@@ -24,7 +24,7 @@ describe('JSHint', function () {
             }
         },
         hasStorage = typeof (Storage) !== "undefined",
-        cache = hasStorage && JSON.parse(localStorage.getItem(cacheName));
+        cache = hasStorage && (JSON.parse(localStorage.getItem(cacheName)) || {});
 
     function cacheJSHintOptions() {
         cache.options = gulpJasmineLivereloadTask.options.jshint.options;
@@ -61,10 +61,10 @@ describe('JSHint', function () {
     }
 
     function addEmptyMessageMatcher(jasmineVersion, test) {
-        if (jasmineVersion < '1.3') {
-            jasmine.addMatchers(toBeEmptyMessageMatchers['<1.3']);
+        if (jasmineVersion > '1.3') {
+            jasmine.addMatchers(toBeEmptyMessageMatchers.currentVersion);
         } else {
-            test.addMatchers(toBeEmptyMessageMatchers.currentVersion);
+            test.addMatchers(toBeEmptyMessageMatchers['<=1.3']);
         }
     }
 

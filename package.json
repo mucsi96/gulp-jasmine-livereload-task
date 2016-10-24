@@ -1,6 +1,6 @@
 {
   "name": "gulp-jasmine-livereload-task",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "Run Jasmine tests in browser with livereload",
   "license": "MIT",
   "author": "Igor Muchychka <mucsi_96@yahoo.com> (https://github.com/mucsi96)",
