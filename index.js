@@ -9,18 +9,17 @@ var parentRequire = require('parent-require'),
     livereload = require('gulp-livereload'),
     webserver = require('gulp-webserver'),
     open = require('open'),
+    peerRequire = require('./peer-require'),
     opened,
-    vendorPath = path.join('node_modules', 'gulp-jasmine-livereload-task', 'vendor'),
     template = {
-        '1.3': path.join(vendorPath, 'jasmine-1.3.1', 'SpecRunner.html'),
-        '2.0': path.join(vendorPath, 'jasmine-2.0.2', 'SpecRunner.html'),
-        '2.1': path.join(vendorPath, 'jasmine-2.1.3', 'SpecRunner.html'),
-        '2.2': path.join(vendorPath, 'jasmine-2.2.0', 'SpecRunner.html'),
-        'peer': path.join(vendorPath, 'jasmine', 'SpecRunner.html')
+        '1.3': path.resolve(__dirname, 'vendor/jasmine-1.3.1/SpecRunner.html'),
+        '2.0': path.resolve(__dirname, 'vendor/jasmine-2.0.2/SpecRunner.html'),
+        '2.1': path.resolve(__dirname, 'vendor/jasmine-2.1.3/SpecRunner.html'),
+        '2.2': path.resolve(__dirname, 'vendor/jasmine-2.2.0/SpecRunner.html'),
+        'peer': path.resolve(__dirname, 'vendor/jasmine-peer/SpecRunner.html')
     },
     jshint = {
-        '2.6': path.join(vendorPath, 'jshint-2.6.0', 'jshint.js'),
-        'peer': path.join('node_modules', 'jshint', 'dist', 'jshint.js')
+        '2.6': path.resolve(__dirname, 'jshint-2.6.0/jshint.js')
     },
     defaults = {
         files: undefined,
@@ -40,18 +39,21 @@ var parentRequire = require('parent-require'),
     options;
 
 module.exports = function (opts) {
-    try {
-        require.resolve('jasmine-core');
+    var peerJasmine = peerRequire('jasmine-core');
+
+    if (peerJasmine.path) {
         defaults.jasmine = 'peer';
-        console.log('Installed Jasmine found');
-    } catch (err) {
+        console.log('Installed Jasmine ' +  peerJasmine.version + ' found');
+    } else {
         console.log('No installed Jasmine found. Using embedded one');
     }
 
     if (opts && opts.jshint && opts.jshint.files && opts.jshint.files.length) {
-        if (fs.existsSync(jshint.peer)) {
+        var peerJsHint = peerRequire('jshint');
+        if (peerJsHint.path) {
             defaults.jshint.version = 'peer';
-            console.log('Installed Jshint found');
+            jshint.peer = path.resolve(peerJsHint.path, 'dist/jshint.js');
+            console.log('Installed Jshint ' + peerJsHint.version + ' found');
         } else {
             console.log('No installed jshint found. Using embedded one');
         }
