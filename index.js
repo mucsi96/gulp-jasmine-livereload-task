@@ -16,7 +16,7 @@ var parentRequire = require('parent-require'),
         '2.0': path.join(vendorPath, 'jasmine-2.0.2', 'SpecRunner.html'),
         '2.1': path.join(vendorPath, 'jasmine-2.1.3', 'SpecRunner.html'),
         '2.2': path.join(vendorPath, 'jasmine-2.2.0', 'SpecRunner.html'),
-        'peer': path.join('node_modules', 'jasmine', 'SpecRunner.html')
+        'peer': path.join(vendorPath, 'jasmine', 'SpecRunner.html')
     },
     jshint = {
         '2.6': path.join(vendorPath, 'jshint-2.6.0', 'jshint.js'),
@@ -40,10 +40,11 @@ var parentRequire = require('parent-require'),
     options;
 
 module.exports = function (opts) {
-    if (fs.existsSync(template.peer)) {
+    try {
+        require.resolve('jasmine-core');
         defaults.jasmine = 'peer';
         console.log('Installed Jasmine found');
-    } else {
+    } catch (err) {
         console.log('No installed Jasmine found. Using embedded one');
     }
 

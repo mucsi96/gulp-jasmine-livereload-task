@@ -1,6 +1,6 @@
 # gulp-jasmine-livereload-task
 
-A [gulp](http://gulpjs.com/) plugin that runs [Jasmine](http://jasmine.github.io/) tests in browser with [livereload](http://livereload.com/). The package will try to use the latests local ```Jasmine``` if exists. If not it will use an embedded version.
+A [gulp](http://gulpjs.com/) plugin that runs [Jasmine](http://jasmine.github.io/) tests in browser with [livereload](http://livereload.com/). The package will try to use the latests local `jasmine-core` if exists. If not it will use an embedded version.
 
 ![alt tag](https://raw.githubusercontent.com/mucsi96/gulp-jasmine-livereload-task/master/img/jasmine.png)
 ![alt tag](https://raw.githubusercontent.com/mucsi96/gulp-jasmine-livereload-task/master/img/jasmine-mobile.png)
@@ -8,7 +8,7 @@ A [gulp](http://gulpjs.com/) plugin that runs [Jasmine](http://jasmine.github.io
 ## Installation
 
 ```
-$ npm install --save-dev jasmine gulp-jasmine-livereload-task
+$ npm install --save-dev jasmine-core gulp-jasmine-livereload-task
 ```
 
 ## Basic usage
