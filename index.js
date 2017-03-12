@@ -45,7 +45,6 @@ module.exports = function (opts) {
         defaults.jasmine = 'peer';
         console.log('Installed Jasmine found');
     } catch (err) {
-        console.error(err)
         console.log('No installed Jasmine found. Using embedded one');
     }
 
