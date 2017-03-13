@@ -19,7 +19,7 @@ var parentRequire = require('parent-require'),
         'peer': path.resolve(__dirname, 'vendor/jasmine-peer/SpecRunner.html')
     },
     jshint = {
-        '2.6': path.resolve(__dirname, 'jshint-2.6.0/jshint.js')
+        '2.6': path.resolve(__dirname, 'vendor/jshint-2.6.0/jshint.js')
     },
     defaults = {
         files: undefined,
