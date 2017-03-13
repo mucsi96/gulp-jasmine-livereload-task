@@ -72,6 +72,8 @@ gulp.task('default', jasmine({
 
 ## Using with webserving
 
+When serving, the generated spec runner is not added to the plugin folder, resulting in a cleaner project (no need to `gitignore` `SpecRunner.html`).
+
 ```javascript
 var gulp    = require('gulp'),
     jasmine = require('gulp-jasmine-livereload-task');
@@ -95,7 +97,7 @@ livereload          Livereload server port. Default: 35729
 host                Host name. If need to be served
 port                Port number. If need to be served
 staticAssetsPath    The root path of the static files served by the webserver, by default it is the plugin folder
-specRunner          The path of the SpecRunner.html file, by default it is the plugin folder / SpecRunner.html
+specRunner          The path to a SpecRunner.html file (relative to staticAssetsPath), if you wish to use your own runner file when serving instead of using the generated runner. This file will be used as-is, not modified by gulp-jasmine-livereload-task.
 jshint.files        Files to be checked by jshint
 jshint.options      Options used by jshint
 jshint.version      Embedded Jshint version. Default: 2.6. Embedded versions: 2.6

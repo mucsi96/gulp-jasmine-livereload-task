@@ -26,7 +26,6 @@ var parentRequire = require('parent-require'),
         jasmine: '2.2',
         livereload: '35729',
         staticAssetsPath: '.',
-        specRunner: 'SpecRunner.html',
         jshint: {
             version: '2.6',
             files: [],
@@ -71,8 +70,18 @@ module.exports = function (opts) {
 };
 
 function createSpecrunner() {
-    var target = gulp.dest('.'),
-        specrunner;
+    var specrunner;
+
+    var target = options.host ?
+        gulp.dest('.', {cwd: path.join(__dirname, 'generated')}) :
+        gulp.dest('.');
+
+    var specRunnerPath = options.specRunner || path.join(
+        'node_modules',
+        'gulp-jasmine-livereload-task',
+        'generated',
+        'SpecRunner.html'
+    );
 
     target.on('end', function () {
         if (!opened) {
@@ -82,9 +91,10 @@ function createSpecrunner() {
                 gulp.src(options.staticAssetsPath)
                     .pipe(
                         webserver({
-                            open: options.specRunner,
+                            open: true,
                             host: options.host,
-                            port: options.port
+                            port: options.port,
+                            fallback: specRunnerPath
                         })
                     );
             }
